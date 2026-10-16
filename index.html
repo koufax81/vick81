@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>서귀포시 읍면동별 기초생활보장 수급 현황 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;350;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#312d2a; --primary-pressed:#47423e; --on-primary:#fff;
+  --brand-mark:#c74634; --ink:#161513; --ink-deep:#211e1c;
+  --canvas:#fff; --canvas-soft:#fbf9f8; --canvas-tint:#f5f4f2; --canvas-warm:#f1efed;
+  --hairline:#e4e1dd; --divider:#e9e7e4; --field-border:#d4cfca;
+  --link:#006b8f; --gold:#f0cc71; --gold-soft:#f7e0a1;
+  --band-teal:#d6e5e5; --band-forest:#33553c; --error:#d63b25; --disabled:#aea8a2;
+  --sec:48px; --gutter:72px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',system-ui,sans-serif;font-weight:400;color:var(--ink);background:var(--canvas);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1600px;margin:0 auto;padding:0 var(--gutter)}
+.band{padding:var(--sec) 0}
+.b-white{background:var(--canvas)} .b-soft{background:var(--canvas-soft)}
+.b-tint{background:var(--canvas-tint)} .b-warm{background:var(--canvas-warm)}
+.b-teal{background:var(--band-teal)} .b-forest{background:var(--band-forest);color:var(--on-primary)}
+.b-dark{background:var(--primary);color:var(--on-primary)}
+
+/* masthead */
+header.mast{height:85px;background:var(--canvas);display:flex;align-items:center;border-bottom:1px solid var(--hairline);position:sticky;top:0;z-index:50}
+.mast .wrap{display:flex;align-items:center;gap:32px;width:100%}
+.wordmark{color:var(--brand-mark);font-size:24px;font-weight:800;letter-spacing:0}
+.mast nav{display:flex;gap:24px;margin-left:auto;flex-wrap:wrap}
+.mast nav a{color:var(--ink);text-decoration:none;font-size:14px;font-weight:600;padding:6px 0;border-bottom:3px solid transparent}
+.mast nav a:hover{border-bottom-color:var(--gold-soft)}
+
+/* hero */
+.hero{background:var(--canvas-warm);padding:var(--sec) 0;position:relative;overflow:hidden}
+.hero svg.topo{position:absolute;inset:0;width:100%;height:100%;opacity:.5}
+.hero .wrap{position:relative}
+h1{font-family:Georgia,'Noto Sans KR',serif;font-size:56px;font-weight:400;line-height:1.2;max-width:22ch}
+.gold-rule{width:40px;height:4px;background:var(--gold);margin:24px 0}
+.lead{font-size:24px;font-weight:400;line-height:1.4;max-width:60ch}
+.meta{margin-top:24px;font-size:12px;line-height:20px;color:var(--primary-pressed)}
+
+h2{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:18px}
+h3{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:18px}
+h4{font-size:18px;font-weight:800;line-height:1.2;margin-bottom:12px}
+p{font-size:16px;line-height:1.5}
+.sub{font-size:16px;font-weight:350;line-height:24px;max-width:78ch;margin-bottom:32px}
+.eyebrow{font-size:14px;font-weight:600;letter-spacing:0;margin-bottom:12px;text-transform:none}
+
+/* stats */
+.grid{display:grid;gap:32px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)} .g23{grid-template-columns:2fr 1fr}
+.stat{background:var(--canvas-warm);border-radius:15px;padding:20px}
+.b-warm .stat,.b-tint .stat{background:var(--canvas)}
+.stat .n{font-family:Georgia,serif;font-size:40px;line-height:1.2}
+.stat .l{font-size:14px;font-weight:600;margin-top:8px}
+.stat .c{font-size:12px;line-height:20px;color:var(--primary-pressed);margin-top:4px}
+
+.card{background:var(--canvas);border:1px solid var(--hairline);border-radius:8px;padding:24px}
+.b-white .card{background:var(--canvas-warm);border-color:transparent}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:var(--canvas-tint);font-size:12px;font-weight:600;line-height:20px;text-align:left;padding:12px 16px;border-bottom:1px solid var(--field-border);white-space:nowrap}
+td{padding:10px 16px;border-bottom:1px solid var(--hairline);font-size:14px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:hover{background:var(--canvas-soft)}
+tfoot td{font-weight:700;background:var(--canvas-tint);border-bottom:none}
+.scroll{overflow-x:auto;background:var(--canvas);border:1px solid var(--hairline);border-radius:8px}
+
+/* bar chart */
+.bars{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:72px 1fr 64px;align-items:center;gap:12px;font-size:14px}
+.track{height:18px;background:var(--canvas-tint);border-radius:4px;overflow:hidden}
+.b-warm .track,.b-tint .track{background:var(--canvas)}
+.fill{height:100%;background:var(--primary);border-radius:4px}
+.fill.alt{background:var(--band-forest)}
+.fill.low{background:var(--field-border)}
+.row .v{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:600}
+
+/* legend */
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;line-height:20px;margin-top:16px}
+.legend span{display:flex;align-items:center;gap:8px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+
+/* matrix */
+.matrix{display:grid;grid-template-columns:110px 1fr 1fr;gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:8px;overflow:hidden}
+.matrix>div{background:var(--canvas);padding:16px}
+.matrix .mh{background:var(--canvas-tint);font-size:12px;font-weight:600;line-height:20px}
+.matrix .type{font-size:14px;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{font-size:12px;line-height:20px;padding:0 10px;border:1px solid var(--hairline);border-radius:9999px}
+.chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;counter-reset:s}
+.step{background:var(--canvas);border-radius:8px;padding:24px;border-top:4px solid var(--gold)}
+.b-white .step{background:var(--canvas-soft)}
+.step .k{font-size:12px;line-height:20px;font-weight:600;color:var(--primary-pressed)}
+.step h4{margin:8px 0 12px}
+.step ul{margin-left:18px;font-size:14px;line-height:22px}
+.gate{margin-top:14px;font-size:12px;line-height:20px;padding:8px 12px;background:var(--canvas-warm);border-radius:4px}
+.b-white .gate{background:var(--canvas-warm)}
+
+ul.ticks{list-style:none;display:flex;flex-direction:column;gap:12px}
+ul.ticks li{padding-left:22px;position:relative;font-size:16px;line-height:24px;font-weight:350}
+ul.ticks li::before{content:"";position:absolute;left:0;top:9px;width:10px;height:3px;background:var(--gold)}
+.b-dark ul.ticks li::before,.b-forest ul.ticks li::before{background:var(--gold)}
+
+.note{border-left:3px solid var(--gold);padding:4px 0 4px 16px;font-size:14px;line-height:22px;margin-top:16px}
+a.ln{color:var(--link);text-decoration:none}
+footer{background:var(--canvas);border-top:1px solid var(--hairline);padding:32px 0;font-size:12px;line-height:20px}
+footer .wrap{display:flex;gap:24px;flex-wrap:wrap;justify-content:space-between}
+
+@media(max-width:1100px){.g4{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:repeat(2,1fr)}.g23,.g3{grid-template-columns:1fr}}
+@media(max-width:700px){
+  :root{--gutter:20px;--sec:32px}
+  h1{font-size:34px}.lead{font-size:18px}h2{font-size:24px}
+  .g4,.g2,.steps,.matrix{grid-template-columns:1fr}
+  .matrix .mh{display:none}
+  .mast nav{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="wrap">
+    <span class="wordmark">서귀포시</span>
+    <nav>
+      <a href="#summary">요약</a><a href="#diag">현황 진단</a><a href="#type">지역 유형</a>
+      <a href="#plan">실행계획</a><a href="#kpi">성과지표</a><a href="#concl">결론</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <svg class="topo" preserveAspectRatio="none" viewBox="0 0 1200 400" aria-hidden="true">
+    <g fill="none" stroke="#e7e4e1" stroke-width="1.2">
+      <path d="M-50 330 C 200 270, 380 360, 620 300 S 1000 240, 1260 290"/>
+      <path d="M-50 300 C 200 240, 380 330, 620 270 S 1000 210, 1260 260"/>
+      <path d="M-50 270 C 200 210, 380 300, 620 240 S 1000 180, 1260 230"/>
+      <path d="M-50 240 C 200 180, 380 270, 620 210 S 1000 150, 1260 200"/>
+      <path d="M-50 210 C 200 150, 380 240, 620 180 S 1000 120, 1260 170"/>
+      <path d="M-50 180 C 200 120, 380 210, 620 150 S 1000  90, 1260 140"/>
+    </g>
+  </svg>
+  <div class="wrap">
+    <h1>읍면동별 기초생활보장 수급 현황 진단 및 취약계층 지원 계획</h1>
+    <div class="gold-rule"></div>
+    <p class="lead">2024년 4월 30일 기준 원본 자료로 한 시점의 구조를 진단하고, 검증 가능한 4단계 실행계획으로 전환한다.</p>
+    <p class="meta">최종 보고서 · 작성일 2026-10-15 · 출처: 서귀포시 기초생활보장수급자 현황(공공데이터, 2024-04-30 기준)</p>
+  </div>
+</section>
+
+<!-- 주의사항 -->
+<section class="band b-teal">
+  <div class="wrap">
+    <h3>먼저 읽을 내용 — 데이터 주의사항</h3>
+    <div class="grid g4">
+      <div class="card" style="background:#fff;border-color:transparent">
+        <h4>2024년 자료</h4><p style="font-size:14px">공공데이터 원본. <strong>주 분석 자료</strong>로 사용.</p>
+      </div>
+      <div class="card" style="background:#fff;border-color:transparent">
+        <h4>2020~2023년</h4><p style="font-size:14px">배율·잡음으로 만든 <strong>교육용 가상데이터</strong>. 추세 해석에 쓰지 않음.</p>
+      </div>
+      <div class="card" style="background:#fff;border-color:transparent">
+        <h4>2025년 자료</h4><p style="font-size:14px">이상치(12,660 / 9999 / −139) 포함. <strong>분석 제외.</strong></p>
+      </div>
+      <div class="card" style="background:#fff;border-color:transparent">
+        <h4>인구 자료</h4><p style="font-size:14px">읍면동 주민등록인구 미확보. 수급률은 <strong>산출 예정</strong>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 요약 -->
+<section class="band b-white" id="summary">
+  <div class="wrap">
+    <h2>한눈에 보는 2024년 현황</h2>
+    <p class="sub">2024년 4월 30일 기준 서귀포시 전체 수급 규모와 구성이다. 가구당 수급권자는 평균 1.42명이며, 조건부수급 가구가 1.88명으로 가장 크다.</p>
+    <div class="grid g4" style="margin-bottom:32px">
+      <div class="stat"><div class="n">7,197</div><div class="l">수급 가구</div><div class="c">2024-04-30 기준</div></div>
+      <div class="stat"><div class="n">10,237</div><div class="l">수급권자</div><div class="c">가구당 평균 1.42명</div></div>
+      <div class="stat"><div class="n">53.6%</div><div class="l">상위 5개 지역 집중도</div><div class="c">5,487명 / 동홍·대정·성산·남원·대천</div></div>
+      <div class="stat"><div class="n">15.7%</div><div class="l">시 평균 조건부 비중</div><div class="c">재가 수급자 기준</div></div>
+    </div>
+
+    <div class="grid g23">
+      <div class="card">
+        <h4>유형별 구성 (수급권자 10,237명)</h4>
+        <div class="bars" style="margin-top:16px">
+          <div class="row"><span>일반</span><div class="track"><div class="fill" style="width:82.2%"></div></div><span class="v">82.2%</span></div>
+          <div class="row"><span>조건부</span><div class="track"><div class="fill alt" style="width:15.6%"></div></div><span class="v">15.6%</span></div>
+          <div class="row"><span>특례</span><div class="track"><div class="fill low" style="width:1.6%"></div></div><span class="v">1.6%</span></div>
+          <div class="row"><span>시설</span><div class="track"><div class="fill low" style="width:0.6%"></div></div><span class="v">0.6%</span></div>
+          <div class="row"><span>기타</span><div class="track"><div class="fill low" style="width:0%"></div></div><span class="v">0.0%</span></div>
+        </div>
+        <div class="legend">
+          <span><i class="sw" style="background:#312d2a"></i>일반수급자 8,417명 / 6,158가구</span>
+          <span><i class="sw" style="background:#33553c"></i>조건부수급자 1,598명 / 851가구</span>
+          <span><i class="sw" style="background:#d4cfca"></i>특례 161명 · 시설 61명</span>
+        </div>
+        <p class="note">'기타 일반수급자'는 17개 읍면동 모두 0이다. 행정 축소의 근거로 쓰지 않고 분류 기준 점검 대상으로 둔다.</p>
+      </div>
+      <div class="card">
+        <h4>핵심 판단 5가지</h4>
+        <ul class="ticks" style="font-size:14px">
+          <li>규모 상위 5곳에 수급권자의 53.6%가 집중.</li>
+          <li>조건부 비중은 중앙동 21.1% · 대륜동 20.9% · 효돈동 20.0% · 정방동 19.7%로 구도심이 높다.</li>
+          <li>절대 수로 고르느냐 비율로 고르느냐에 따라 우선 지역이 달라진다.</li>
+          <li>시설수급 61명 중 영천동 15명은 시설 소재지 효과 — 지역 수요 지표에서 분리.</li>
+          <li>실행은 대규모 확대가 아니라 정비 → 조사 → 시범 → 확대 순서로.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 현황 진단 -->
+<section class="band b-soft" id="diag">
+  <div class="wrap">
+    <h2>읍면동별 진단</h2>
+    <p class="sub">왼쪽은 업무량·예산 총량을 결정하는 절대 규모, 오른쪽은 자활·고용 지원 필요도를 보여 주는 조건부 비중이다. 두 축의 순위가 서로 다르다는 점이 이 보고서의 핵심이다.</p>
+    <div class="grid g2">
+      <div class="card" style="background:#fff">
+        <h4>수급권자 규모 (명)</h4>
+        <div class="bars" style="margin-top:16px">
+          <div class="row"><span>동홍동</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="v">1,518</span></div>
+          <div class="row"><span>대정읍</span><div class="track"><div class="fill" style="width:79.2%"></div></div><span class="v">1,203</span></div>
+          <div class="row"><span>성산읍</span><div class="track"><div class="fill" style="width:67.5%"></div></div><span class="v">1,024</span></div>
+          <div class="row"><span>남원읍</span><div class="track"><div class="fill" style="width:60.4%"></div></div><span class="v">917</span></div>
+          <div class="row"><span>대천동</span><div class="track"><div class="fill" style="width:54.3%"></div></div><span class="v">825</span></div>
+          <div class="row"><span>표선면</span><div class="track"><div class="fill low" style="width:40.1%"></div></div><span class="v">608</span></div>
+          <div class="row"><span>대륜동</span><div class="track"><div class="fill low" style="width:36.9%"></div></div><span class="v">560</span></div>
+          <div class="row"><span>서홍동</span><div class="track"><div class="fill low" style="width:36.2%"></div></div><span class="v">549</span></div>
+          <div class="row"><span>중문동</span><div class="track"><div class="fill low" style="width:31.6%"></div></div><span class="v">480</span></div>
+          <div class="row"><span>중앙동</span><div class="track"><div class="fill low" style="width:30.6%"></div></div><span class="v">464</span></div>
+        </div>
+        <div class="legend"><span><i class="sw" style="background:#312d2a"></i>상위 5개 지역 (53.6%)</span><span><i class="sw" style="background:#d4cfca"></i>그 외</span></div>
+      </div>
+      <div class="card" style="background:#fff">
+        <h4>조건부 비중 (%) — 시 평균 15.7%</h4>
+        <div class="bars" style="margin-top:16px">
+          <div class="row"><span>중앙동</span><div class="track"><div class="fill alt" style="width:100%"></div></div><span class="v">21.1</span></div>
+          <div class="row"><span>대륜동</span><div class="track"><div class="fill alt" style="width:99.1%"></div></div><span class="v">20.9</span></div>
+          <div class="row"><span>효돈동</span><div class="track"><div class="fill alt" style="width:94.8%"></div></div><span class="v">20.0</span></div>
+          <div class="row"><span>정방동</span><div class="track"><div class="fill alt" style="width:93.4%"></div></div><span class="v">19.7</span></div>
+          <div class="row"><span>서홍동</span><div class="track"><div class="fill alt" style="width:91.0%"></div></div><span class="v">19.2</span></div>
+          <div class="row"><span>표선면</span><div class="track"><div class="fill alt" style="width:83.4%"></div></div><span class="v">17.6</span></div>
+          <div class="row"><span>송산동</span><div class="track"><div class="fill alt" style="width:81.0%"></div></div><span class="v">17.1</span></div>
+          <div class="row"><span>남원읍</span><div class="track"><div class="fill alt" style="width:77.7%"></div></div><span class="v">16.4</span></div>
+          <div class="row"><span>동홍동</span><div class="track"><div class="fill low" style="width:73.5%"></div></div><span class="v">15.5</span></div>
+          <div class="row"><span>대정읍</span><div class="track"><div class="fill low" style="width:63.0%"></div></div><span class="v">13.3</span></div>
+          <div class="row"><span>성산읍</span><div class="track"><div class="fill low" style="width:50.2%"></div></div><span class="v">10.6</span></div>
+        </div>
+        <div class="legend"><span><i class="sw" style="background:#33553c"></i>시 평균 초과</span><span><i class="sw" style="background:#d4cfca"></i>평균 이하 (규모 상위 3곳)</span></div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:32px">
+      <div class="card" style="background:#fff">
+        <h4>① 규모 집중</h4><p style="font-size:14px">상위 5곳 5,487명(53.6%). 상담·조사·사례관리 업무량도 몰릴 가능성이 크다. 1인당 사례 수 확인 후 인력 배치 조정.</p>
+      </div>
+      <div class="card" style="background:#fff">
+        <h4>② 동 vs 읍면</h4><p style="font-size:14px">동 지역 조건부 비중 <strong>17.0%</strong>, 읍면 <strong>13.8%</strong>. 단, 조건부수급자가 모두 바로 일할 수 있는 사람은 아니다.</p>
+      </div>
+      <div class="card" style="background:#fff">
+        <h4>③ 확인 필요</h4><p style="font-size:14px">성산읍 특례수급이 10가구·9명으로 인원이 가구보다 적다. 원본도 동일 — 집계 기준 확인 필요.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 전체 표 -->
+<section class="band b-white">
+  <div class="wrap">
+    <h2>읍면동별 전체 현황</h2>
+    <p class="sub">수급권자 순. 조건부 비중은 시설수급자를 제외한 재가 수급자 기준이며, 시 평균 15.7%를 넘는 값은 굵게 표시했다.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr>
+          <th>읍면동</th><th>구분</th><th class="num">가구</th><th class="num">수급권자</th><th class="num">시 점유율</th>
+          <th class="num">조건부(명)</th><th class="num">조건부 비중</th><th class="num">특례</th><th class="num">시설</th><th class="num">가구당</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>동홍동</td><td>동</td><td class="num">986</td><td class="num">1,518</td><td class="num">14.8%</td><td class="num">235</td><td class="num">15.5%</td><td class="num">27</td><td class="num">2</td><td class="num">1.54</td></tr>
+          <tr><td>대정읍</td><td>읍면</td><td class="num">901</td><td class="num">1,203</td><td class="num">11.8%</td><td class="num">159</td><td class="num">13.3%</td><td class="num">10</td><td class="num">5</td><td class="num">1.34</td></tr>
+          <tr><td>성산읍</td><td>읍면</td><td class="num">745</td><td class="num">1,024</td><td class="num">10.0%</td><td class="num">108</td><td class="num">10.6%</td><td class="num">9</td><td class="num">4</td><td class="num">1.37</td></tr>
+          <tr><td>남원읍</td><td>읍면</td><td class="num">653</td><td class="num">917</td><td class="num">9.0%</td><td class="num">149</td><td class="num"><strong>16.4%</strong></td><td class="num">12</td><td class="num">9</td><td class="num">1.40</td></tr>
+          <tr><td>대천동</td><td>동</td><td class="num">538</td><td class="num">825</td><td class="num">8.1%</td><td class="num">131</td><td class="num"><strong>15.9%</strong></td><td class="num">24</td><td class="num">0</td><td class="num">1.53</td></tr>
+          <tr><td>표선면</td><td>읍면</td><td class="num">429</td><td class="num">608</td><td class="num">5.9%</td><td class="num">107</td><td class="num"><strong>17.6%</strong></td><td class="num">3</td><td class="num">1</td><td class="num">1.42</td></tr>
+          <tr><td>대륜동</td><td>동</td><td class="num">358</td><td class="num">560</td><td class="num">5.5%</td><td class="num">115</td><td class="num"><strong>20.9%</strong></td><td class="num">7</td><td class="num">9</td><td class="num">1.56</td></tr>
+          <tr><td>서홍동</td><td>동</td><td class="num">358</td><td class="num">549</td><td class="num">5.4%</td><td class="num">104</td><td class="num"><strong>19.2%</strong></td><td class="num">1</td><td class="num">7</td><td class="num">1.53</td></tr>
+          <tr><td>중문동</td><td>동</td><td class="num">351</td><td class="num">480</td><td class="num">4.7%</td><td class="num">75</td><td class="num">15.7%</td><td class="num">15</td><td class="num">1</td><td class="num">1.37</td></tr>
+          <tr><td>중앙동</td><td>동</td><td class="num">354</td><td class="num">464</td><td class="num">4.5%</td><td class="num">98</td><td class="num"><strong>21.1%</strong></td><td class="num">8</td><td class="num">0</td><td class="num">1.31</td></tr>
+          <tr><td>안덕면</td><td>읍면</td><td class="num">333</td><td class="num">461</td><td class="num">4.5%</td><td class="num">55</td><td class="num">12.1%</td><td class="num">14</td><td class="num">8</td><td class="num">1.38</td></tr>
+          <tr><td>효돈동</td><td>동</td><td class="num">239</td><td class="num">415</td><td class="num">4.1%</td><td class="num">83</td><td class="num"><strong>20.0%</strong></td><td class="num">8</td><td class="num">0</td><td class="num">1.74</td></tr>
+          <tr><td>천지동</td><td>동</td><td class="num">314</td><td class="num">403</td><td class="num">3.9%</td><td class="num">56</td><td class="num">13.9%</td><td class="num">9</td><td class="num">0</td><td class="num">1.28</td></tr>
+          <tr><td>영천동</td><td>동</td><td class="num">170</td><td class="num">240</td><td class="num">2.3%</td><td class="num">22</td><td class="num">9.8%</td><td class="num">1</td><td class="num">15</td><td class="num">1.41</td></tr>
+          <tr><td>정방동</td><td>동</td><td class="num">184</td><td class="num">218</td><td class="num">2.1%</td><td class="num">43</td><td class="num"><strong>19.7%</strong></td><td class="num">2</td><td class="num">0</td><td class="num">1.18</td></tr>
+          <tr><td>송산동</td><td>동</td><td class="num">157</td><td class="num">193</td><td class="num">1.9%</td><td class="num">33</td><td class="num"><strong>17.1%</strong></td><td class="num">6</td><td class="num">0</td><td class="num">1.23</td></tr>
+          <tr><td>예래동</td><td>동</td><td class="num">127</td><td class="num">159</td><td class="num">1.6%</td><td class="num">25</td><td class="num">15.7%</td><td class="num">5</td><td class="num">0</td><td class="num">1.25</td></tr>
+        </tbody>
+        <tfoot><tr><td>시 합계</td><td></td><td class="num">7,197</td><td class="num">10,237</td><td class="num">100%</td><td class="num">1,598</td><td class="num">15.7%</td><td class="num">161</td><td class="num">61</td><td class="num">1.42</td></tr></tfoot>
+      </table>
+    </div>
+    <p class="note">예래동(15.72%)과 중문동(15.66%)은 반올림하면 시 평균과 같아 보인다. 반올림 전 값으로 비교해 예래동은 C, 중문동은 D로 두었다.</p>
+  </div>
+</section>
+
+<!-- 유형 분류 -->
+<section class="band b-warm" id="type">
+  <div class="wrap">
+    <h2>지역 유형 분류 (잠정)</h2>
+    <p class="sub">규모 기준 수급권자 500명 이상, 비중 기준 시 평균 15.70% 초과. 수급률이 산출되면 다시 분류한다.</p>
+    <div class="matrix">
+      <div class="mh"></div><div class="mh">조건부 비중 높음</div><div class="mh">조건부 비중 평균 이하</div>
+
+      <div class="mh" style="display:flex;align-items:center">규모 큼<br>(500명↑)</div>
+      <div>
+        <div class="type">A · 자활 + 사례관리 동시 보강</div>
+        <div class="chips"><span class="chip on">남원읍</span><span class="chip on">대천동</span><span class="chip on">표선면</span><span class="chip on">대륜동</span><span class="chip on">서홍동</span></div>
+        <p style="font-size:14px">자활·고용 연계와 사례관리 인력을 함께 보강한다.</p>
+      </div>
+      <div>
+        <div class="type">B · 사례관리·돌봄 중심</div>
+        <div class="chips"><span class="chip">동홍동</span><span class="chip">대정읍</span><span class="chip">성산읍</span></div>
+        <p style="font-size:14px">일반수급자 사례관리와 돌봄 중심, 업무량에 맞춘 인력 배치.</p>
+      </div>
+
+      <div class="mh" style="display:flex;align-items:center">규모 작음</div>
+      <div>
+        <div class="type">C · 인접 동 공동 창구</div>
+        <div class="chips"><span class="chip on">중앙동</span><span class="chip on">효돈동</span><span class="chip on">정방동</span><span class="chip on">송산동</span><span class="chip on">예래동</span></div>
+        <p style="font-size:14px">인접 동과 묶은 공동 자활·고용 상담.</p>
+      </div>
+      <div>
+        <div class="type">D · 기본 사례관리 유지</div>
+        <div class="chips"><span class="chip">중문동</span><span class="chip">안덕면</span><span class="chip">천지동</span><span class="chip">영천동</span></div>
+        <p style="font-size:14px">영천동은 시설수급 15명에 대한 연계를 별도 관리한다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 추이 입장 -->
+<section class="band b-forest">
+  <div class="wrap">
+    <h2 style="color:#fff">2020~2023년 추이는 해석하지 않는다</h2>
+    <p class="sub" style="color:#e9efe9">초안의 "연 5%대 증가 후 2024년 1.80% 둔화", "대천동 25.08%·성산읍 23.5% 급증" 해석을 채택하지 않는 네 가지 이유.</p>
+    <div class="grid g4">
+      <div><h4 style="color:#fff">자료가 가상이다</h4><p style="font-size:14px;color:#e9efe9">2024년 원본에 공통 배율과 칸별 잡음을 준 생성값. 지역별 증가율 차이는 생성 규칙의 산물.</p></div>
+      <div><h4 style="color:#fff">기대 증가율이 모두 같다</h4><p style="font-size:14px;color:#e9efe9">1 ÷ 0.84 = 1.19 — 모든 읍면동의 2020→2024 기대 증가율이 약 19%로 동일하다.</p></div>
+      <div><h4 style="color:#fff">한 해로 판단 불가</h4><p style="font-size:14px;color:#e9efe9">실제 자료라도 한 해 수치로 구조적 안정기를 판단할 수 없다.</p></div>
+      <div><h4 style="color:#fff">제도 변화 미반영</h4><p style="font-size:14px;color:#e9efe9">기준중위소득 조정, 부양의무자 기준 완화, 인구 이동을 함께 봐야 한다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 실행계획 -->
+<section class="band b-white" id="plan">
+  <div class="wrap">
+    <h2>4단계 실행계획</h2>
+    <p class="sub">초안의 "1~2년차부터 대규모 확대"를 정비 → 조사 → 시범 → 확대 순서로 바꾸고, 단계마다 다음 단계로 넘어갈 조건을 둔다.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="k">1단계 · 0~6개월 · 추가 예산 거의 없음</div>
+        <h4>즉시 정비</h4>
+        <ul><li>데이터 품질 점검</li><li>읍면동 수급률 산출</li><li>1인당 사례 수 파악</li><li>시설수급자 분리 관리</li></ul>
+        <div class="gate">완료 기준 — 점검 결과 보고, 유형 재분류, 인력 배치 기준안</div>
+      </div>
+      <div class="step">
+        <div class="k">2단계 · 6~18개월</div>
+        <h4>조사·평가</h4>
+        <ul><li>기존 자활사업 성과 평가</li><li>조건부수급자 개별 평가</li><li>접근성 조사</li><li>지역 고용 여건 조사</li></ul>
+        <div class="gate">완료 기준 — 사업별 확대·개선·종료 판단, 개인별 지원 유형 분류</div>
+      </div>
+      <div class="step">
+        <div class="k">3단계 · 2년차</div>
+        <h4>시범사업</h4>
+        <ul><li>유형별 1~2곳, 1년 이상</li><li>비교 지역과 성과 대조</li><li>빅데이터 탐지는 제외</li></ul>
+        <div class="gate">진입 조건 — 예산·재원·인력·평가 방법·비교 지역이 확정되지 않으면 시작하지 않는다</div>
+      </div>
+      <div class="step">
+        <div class="k">4단계 · 3년차 이후</div>
+        <h4>확대·조정</h4>
+        <ul><li>성과 기준 통과 사업만 확대</li><li>재정·조직 계획 별도 수립</li><li>운영비 지속 사업은 비용편익 분석</li></ul>
+        <div class="gate">성과가 낮은 사업은 구조를 고치거나 종료한다</div>
+      </div>
+    </div>
+
+    <div class="scroll" style="margin-top:32px">
+      <table>
+        <thead><tr><th>시범사업</th><th>후보 지역(잠정)</th><th>선정 이유</th></tr></thead>
+        <tbody>
+          <tr><td>동 단위 공동 자활·고용 상담창구</td><td>중앙동 + 정방동 + 송산동</td><td>조건부 비중은 높지만 단독 창구를 둘 규모는 아님</td></tr>
+          <tr><td>자활 연계 강화</td><td>대륜동 또는 남원읍</td><td>규모와 조건부 비중이 모두 높음</td></tr>
+          <tr><td>이동식 복지 상담</td><td>이동시간 최장 읍면 1곳</td><td>접근성 조사 결과로 정함</td></tr>
+          <tr><td>사례관리 인력 보강</td><td>동홍동</td><td>수급자 규모 1위, 업무량 확인 후</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- KPI -->
+<section class="band b-tint" id="kpi">
+  <div class="wrap">
+    <h2>성과지표 — 기준선과 부작용 지표를 함께</h2>
+    <p class="sub">초안의 KPI에는 기준선과 목표값이 없었다. 목표값은 기준선이 확정된 뒤 정한다.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>지표</th><th>기준선</th><th>주기</th><th>함께 볼 부작용 지표</th></tr></thead>
+        <tbody>
+          <tr><td>조건부수급자 자활 참여율</td><td>1단계에서 산출 (조건부수급권자 1,598명)</td><td>분기</td><td>중도 탈락률, 참여 강제 민원</td></tr>
+          <tr><td>탈수급 후 12개월 고용 유지율</td><td>2단계 평가에서 산출</td><td>연</td><td>재수급률, 탈수급 후 소득 변화</td></tr>
+          <tr><td>사례관리 업무량 (수급자 ÷ 담당 인력)</td><td>1단계에서 산출</td><td>반기</td><td>상담 대기시간</td></tr>
+          <tr><td>위기가구 발굴 건수</td><td>현재 실적</td><td>분기</td><td>발굴 후 미지원 건수, 오탐·낙인 민원</td></tr>
+          <tr><td>접근성 (읍면 평균 상담 이동시간)</td><td>2단계 조사에서 산출</td><td>연</td><td>이동상담 1회당 비용</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><strong>탈수급률은 단독 목표로 쓰지 않는다.</strong> 탈수급만 성과로 잡으면 권리 보장보다 자격 종료를 우선하게 될 수 있다.</p>
+  </div>
+</section>
+
+<!-- 필요 자료 -->
+<section class="band b-soft">
+  <div class="wrap">
+    <h2>추가로 필요한 자료</h2>
+    <div class="grid g2">
+      <div class="card" style="background:#fff">
+        <h4>필수 — 1~2단계 안에 확보</h4>
+        <ul class="ticks" style="font-size:14px">
+          <li>읍면동별 주민등록인구·세대수·연령 구조</li>
+          <li>실제 2020~2024년 수급자 자료(신규·탈수급·재수급 포함)</li>
+          <li>기존 자활사업 성과 자료</li>
+          <li>기존 사업별 비용·재원 구조</li>
+          <li>맞춤형복지팀 인력·사례 수</li>
+        </ul>
+      </div>
+      <div class="card" style="background:#fff">
+        <h4>선택 — 해당 사업 검토 시 확보</h4>
+        <ul class="ticks" style="font-size:14px">
+          <li>교통·시설 거리·이동시간</li>
+          <li>지역 고용 구조</li>
+          <li>시설별 정원·입소 전 거주지</li>
+          <li>신규 사업 확대 시 중기 재정 전망</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 결론 -->
+<section class="band b-dark" id="concl">
+  <div class="wrap">
+    <h2 style="color:#fff">결론</h2>
+    <div class="gold-rule"></div>
+    <div class="grid g2">
+      <div>
+        <ul class="ticks" style="color:#f1efed">
+          <li>2024년 원본 자료로만 현황을 진단하고, 시계열 판단은 실제 자료 확보 뒤로 미룬다.</li>
+          <li>지역 우선순위는 규모·조건부 비중·수급률을 함께 보고 정한다.</li>
+          <li>사업은 즉시 정비 → 조사·평가 → 시범 → 확대 순서로, 단계마다 넘어갈 조건을 둔다.</li>
+          <li>성과는 기준선이 있는 지표로 측정하고, 탈수급 이후의 생활 안정을 함께 본다.</li>
+        </ul>
+      </div>
+      <div style="display:flex;align-items:center">
+        <p style="font-family:Georgia,serif;font-size:28px;line-height:1.4;color:#fff">복지계획의 목표는 수급자 수를 줄이는 것이 아니라, 필요한 주민이 적절한 지원을 받고 안정된 생활을 이어 가게 하는 것이다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>서귀포시 읍면동별 기초생활보장 수급 현황 진단 및 취약계층 지원 계획 (최종 보고서) · 2026-10-15</span>
+    <span>출처: 서귀포시 기초생활보장수급자 현황(공공데이터, 2024-04-30 기준) · 2020~2023년 값은 교육용 가상데이터</span>
+  </div>
+</footer>
+
+</body>
+</html>
